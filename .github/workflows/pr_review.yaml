@@ -8,8 +8,7 @@ name: Semantic View PR Review (Cortex Code)
 # the Snowflake CLI in deploy_dbt_project.yaml - Cortex Code never deploys.
 #
 # Required repo secrets:
-#   SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PAT
-#   (PAT = a programmatic access token for a user with SNOWFLAKE.CORTEX_USER)
+#   SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD
 
 on:
   pull_request:
@@ -44,7 +43,7 @@ jobs:
           [default]
           account = "${{ secrets.SNOWFLAKE_ACCOUNT }}"
           user = "${{ secrets.SNOWFLAKE_USER }}"
-          password = "${{ secrets.SNOWFLAKE_PAT }}"
+          password = "${{ secrets.SNOWFLAKE_PASSWORD }}"
           EOF
           chmod 600 ~/.snowflake/connections.toml
 
