@@ -1,0 +1,118 @@
+# =============================================================================
+# 3. Snowflake Semantic Views
+# =============================================================================
+# - Multiple logical tables in one view
+# - Dimensions, time_dimensions, facts as separate sections
+# - Metrics with free-form SQL aggregation
+# - Derived metrics at view level (cross-table)
+# - Rich AI context: synonyms, verified_queries
+# - Access modifiers for visibility control
+
+name: ecommerce_analytics
+description: "E-commerce sales and customer analytics"
+
+tables:
+  - name: orders
+    description: "Customer order transactions"
+    base_table:
+      database: analytics
+      schema: public
+      table: orders
+    dimensions:
+      - name: order_id
+        description: "Unique order identifier"
+        expr: order_id
+        data_type: VARCHAR
+        unique: true
+      - name: status
+        synonyms: ["order status", "state"]
+        description: "Order status (pending, shipped, delivered, cancelled)"
+        expr: status
+        data_type: VARCHAR
+        is_enum: true
+        sample_values: ["pending", "shipped", "delivered", "cancelled"]
+    time_dimensions:
+      - name: order_date
+        synonyms: ["purchase date", "transaction date"]
+        description: "Date the order was placed"
+        expr: order_date
+        data_type: DATE
+    facts:
+      - name: amount
+        synonyms: ["order total", "order amount"]
+        description: "Total amount for the order"
+        expr: amount
+        data_type: NUMBER
+    metrics:
+      - name: total_revenue
+        synonyms: ["total sales", "revenue"]
+        description: "Total revenue from all orders"
+        expr: SUM(amount)
+      - name: order_count
+        description: "Total number of orders"
+        expr: COUNT(order_id)
+
+  - name: customers
+    description: "Customer information"
+    base_table:
+      database: analytics
+      schema: public
+      table: customers
+    dimensions:
+      - name: customer_id
+        description: "Unique customer identifier"
+        expr: customer_id
+        data_type: VARCHAR
+        unique: true
+      - name: customer_name
+        synonyms: ["client name", "name"]
+        description: "Full name of the customer"
+        expr: name
+        data_type: VARCHAR
+      - name: segment
+        synonyms: ["market segment", "customer type"]
+        description: "Customer market segment"
+        expr: segment
+        data_type: VARCHAR
+        is_enum: true
+        sample_values: ["Enterprise", "SMB", "Consumer"]
+
+relationships:
+  - name: orders_to_customers
+    left_table: orders
+    right_table: customers
+    relationship_columns:
+      - left_column: customer_id
+        right_column: customer_id
+
+metrics:
+  - name: avg_order_value
+    synonyms: ["AOV", "average basket size"]
+    description: "Average order value"
+    expr: orders.total_revenue / orders.order_count
+    access_modifier: public_access
+
+verified_queries:
+  - name: revenue_by_segment
+    question: "What is total revenue by customer segment?"
+    sql: |
+      SELECT
+        c.segment,
+        SUM(o.amount) as total_revenue
+      FROM analytics.public.orders o
+      JOIN analytics.public.customers c
+        ON o.customer_id = c.customer_id
+      GROUP BY c.segment
+      ORDER BY total_revenue DESC
+    use_as_onboarding_question: true
+
+  - name: monthly_order_count
+    question: "How many orders were placed each month?"
+    sql: |
+      SELECT
+        DATE_TRUNC('month', order_date) as month,
+        COUNT(*) as order_count
+      FROM analytics.public.orders
+      GROUP BY month
+      ORDER BY month DESC
+    use_as_onboarding_question: true

@@ -1,0 +1,135 @@
+# Semantic Model Comparison: Same Business Logic, Three Specs
+# 
+# Scenario: An e-commerce model with:
+#   - Orders table (fact): order_id, customer_id, order_date, amount, status
+#   - Customers table (dimension): customer_id, name, segment
+#   - Metrics: total_revenue, order_count, avg_order_value (derived)
+
+# =============================================================================
+# 1. OSI (Open Semantic Interchange) v0.1.1
+# =============================================================================
+# - Datasets with explicit FK relationships
+# - Fields with multi-dialect expressions
+# - Metrics as free-form SQL
+# - AI context annotations everywhere
+
+semantic_model:
+  - name: ecommerce_analytics
+    description: E-commerce sales and customer analytics
+    ai_context:
+      instructions: "Use this model for revenue, order volume, and customer segmentation analysis"
+      examples:
+        - "What is total revenue by segment?"
+        - "How many orders were placed last month?"
+
+    datasets:
+      - name: orders
+        source: analytics.public.orders
+        primary_key: [order_id]
+        description: Customer order transactions
+        ai_context:
+          synonyms: ["purchases", "transactions", "sales"]
+        fields:
+          - name: order_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: order_id
+            description: Unique order identifier
+
+          - name: customer_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: customer_id
+            description: Foreign key to customers
+
+          - name: order_date
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: order_date
+            dimension:
+              is_time: true
+            description: Date the order was placed
+            ai_context:
+              synonyms: ["purchase date", "transaction date"]
+
+          - name: amount
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: amount
+                - dialect: SNOWFLAKE
+                  expression: amount::NUMBER(10,2)
+            description: Order total amount
+
+          - name: status
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: status
+            description: Order status
+            ai_context:
+              synonyms: ["order status", "state"]
+
+      - name: customers
+        source: analytics.public.customers
+        primary_key: [customer_id]
+        description: Customer dimension table
+        fields:
+          - name: customer_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: customer_id
+            description: Unique customer identifier
+
+          - name: name
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: name
+            description: Customer full name
+
+          - name: segment
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: segment
+            description: Market segment
+            ai_context:
+              synonyms: ["market segment", "customer type"]
+
+    relationships:
+      - name: orders_to_customers
+        from: orders
+        to: customers
+        from_columns: [customer_id]
+        to_columns: [customer_id]
+
+    metrics:
+      - name: total_revenue
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: SUM(orders.amount)
+        description: Total revenue from all orders
+        ai_context:
+          synonyms: ["total sales", "revenue"]
+
+      - name: order_count
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: COUNT(orders.order_id)
+        description: Total number of orders
+
+      - name: avg_order_value
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: SUM(orders.amount) / COUNT(orders.order_id)
+        description: Average order value
+        ai_context:
+          synonyms: ["AOV", "average basket size"]

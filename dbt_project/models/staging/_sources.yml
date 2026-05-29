@@ -1,0 +1,19 @@
+version: 2
+
+sources:
+  - name: raw
+    description: >
+      Obfuscated source tables loaded from TPC-H by scripts/00_setup_sources.sql.
+      Names and columns are intentionally cryptic and metadata-poor: this is what
+      an AI agent sees BEFORE the modeled mart and semantic view exist.
+    database: DE214_DEMO
+    schema: RAW
+    tables:
+      - name: C_MST
+        description: "Customer master (from TPC-H CUSTOMER)."
+      - name: ORD_HDR
+        description: "Order header (from TPC-H ORDERS)."
+      - name: LN_ITM
+        description: "Order line items (from TPC-H LINEITEM)."
+      - name: GEO
+        description: "Nation/region lookup (from TPC-H NATION + REGION)."

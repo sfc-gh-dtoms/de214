@@ -1,0 +1,32 @@
+# profiles.yml lives inside the project so `snow dbt deploy` bundles it.
+# IMPORTANT (Snowflake-native dbt): do NOT add `password` or `authenticator`
+# here. Authentication is provided by the Snowflake CLI connection at
+# deploy/execute time (`snow dbt ... -c <connection>`), and by the executing
+# user's context once the project runs inside Snowflake.
+#
+# Two targets share one database and differ only by schema:
+#   dev  -> DE214_DEMO.DEV   (local / iterative builds)
+#   prod -> DE214_DEMO.PROD  (CI/CD deploys here)
+# Source (obfuscated) tables live in DE214_DEMO.RAW.
+
+de214_demo:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: 'not used'
+      user: 'not used'
+      role: DEMO_ROLE
+      warehouse: DEMO_WH
+      database: DE214_DEMO
+      schema: DEV
+      threads: 4
+    prod:
+      type: snowflake
+      account: 'not used'
+      user: 'not used'
+      role: DEMO_ROLE
+      warehouse: DEMO_WH
+      database: DE214_DEMO
+      schema: PROD
+      threads: 4

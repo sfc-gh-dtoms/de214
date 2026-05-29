@@ -1,0 +1,34 @@
+# EXAMPLE local profile for TRUE local execution (plain `dbt run` from a laptop).
+#
+# Copy this into dbt's home location:
+#     cp dbt_project/profiles.local.example.yml ~/.dbt/profiles.yml
+# If you already have a ~/.dbt/profiles.yml, MERGE the `de214_demo:` block below
+# into it (one file can hold many profiles) instead of overwriting.
+#
+# NOTE: dbt's profile search order is `--profiles-dir` -> PROJECT ROOT -> ~/.dbt/.
+# Because the committed dbt_project/profiles.yml sits in the project root, it WINS
+# over this file when you run dbt from dbt_project/. To make ~/.dbt the default for
+# all shells, set this once (then restart your terminal):
+#     echo 'export DBT_PROFILES_DIR="$HOME/.dbt"' >> ~/.zshrc
+#     # or per-command: dbt run --target dev --profiles-dir ~/.dbt
+#
+# Auth here is SSO (externalbrowser) -> no secrets are stored in this file.
+#
+# IMPORTANT: never add `authenticator`, `password`, or `{{ env_var(...) }}` to the
+# committed dbt_project/profiles.yml -- that file is bundled into the Snowflake
+# dbt Project object and parsed server-side, where those fields fail to deploy.
+# Local auth belongs ONLY in ~/.dbt/profiles.yml.
+
+de214_demo:                          # must match `profile:` in dbt_project.yml
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: MY_ACCOUNT
+      user: MY_USER
+      authenticator: externalbrowser  # SSO browser login; no stored secret
+      role: DEMO_ROLE
+      warehouse: DEMO_WH
+      database: DE214_DEMO
+      schema: DEV
+      threads: 4

@@ -1,0 +1,20 @@
+name: 'de214_demo'
+version: '1.0.0'
+config-version: 2
+
+profile: 'de214_demo'
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  de214_demo:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

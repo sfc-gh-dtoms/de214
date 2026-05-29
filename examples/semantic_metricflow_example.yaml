@@ -1,0 +1,106 @@
+# =============================================================================
+# 2. dbt MetricFlow
+# =============================================================================
+# - One semantic model per dbt model (so two files here)
+# - Entities as typed join keys (implicit join via name matching)
+# - Dimensions on columns with type: categorical | time
+# - Metrics with typed aggregations (agg: sum, count, etc.)
+# - Derived metrics reference other metrics by name
+
+# --- File: models/orders.yml ---
+
+models:
+  - name: orders
+    description: "Customer order transactions"
+    semantic_model:
+      enabled: true
+
+      agg_time_dimension: order_date
+
+      columns:
+        - name: order_id
+          entity:
+            type: primary
+            name: order
+
+        - name: customer_id
+          entity:
+            type: foreign
+            name: customer
+
+        - name: order_date
+          granularity: day
+          dimension:
+            type: time
+            name: order_date
+            label: "Order Date"
+            description: "Date the order was placed"
+
+        - name: amount
+          dimension:
+            type: categorical
+            name: amount
+
+        - name: status
+          dimension:
+            type: categorical
+            name: status
+
+      metrics:
+        - name: total_revenue
+          description: "Total revenue from all orders"
+          type: simple
+          label: Total Revenue
+          agg: sum
+          expr: amount
+
+        - name: order_count
+          description: "Total number of orders"
+          type: simple
+          label: Order Count
+          agg: count
+          expr: order_id
+
+        - name: avg_order_value
+          description: "Average order value"
+          type: derived
+          label: Average Order Value
+          expr: revenue / orders
+          input_metrics:
+            - name: total_revenue
+              alias: revenue
+            - name: order_count
+              alias: orders
+
+# --- File: models/customers.yml ---
+
+  - name: customers
+    description: "Customer dimension table"
+    semantic_model:
+      enabled: true
+
+      agg_time_dimension: created_at
+
+      columns:
+        - name: customer_id
+          entity:
+            type: primary
+            name: customer
+
+        - name: name
+          dimension:
+            type: categorical
+            name: customer_name
+            label: "Customer Name"
+
+        - name: segment
+          dimension:
+            type: categorical
+            name: segment
+            label: "Market Segment"
+
+        - name: created_at
+          granularity: day
+          dimension:
+            type: time
+            name: created_at

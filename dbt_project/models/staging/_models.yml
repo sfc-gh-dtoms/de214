@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: "Cleaned customer master with friendly names, plus nation/region."
+    columns:
+      - name: customer_id
+        description: "Unique customer identifier."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_orders
+    description: "Cleaned order header. `order_total` is the TPC-H header price (includes tax)."
+    columns:
+      - name: order_id
+        description: "Unique order identifier."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_lineitems
+    description: "Cleaned order line items with raw economics (extended_price, discount, tax)."
+    columns:
+      - name: order_id
+        description: "Order this line belongs to (FK to stg_orders)."
+        data_tests:
+          - not_null

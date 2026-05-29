@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: mart_order_sales
+    description: >
+      Order-grain sales fact, built incrementally. Exposes both `order_total`
+      (header, incl. tax) and `net_revenue` (line-derived: extended_price *
+      (1 - discount)). The semantic view defines which is "revenue".
+    columns:
+      - name: order_id
+        description: "Unique order identifier (incremental merge key)."
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Customer who placed the order."
+        data_tests:
+          - not_null
+      - name: net_revenue
+        description: "Sum over lines of extended_price * (1 - discount)."
+
+  - name: mart_customer_sales
+    description: "Customer-grain rollup of sales with segment, nation and region."
+    columns:
+      - name: customer_id
+        description: "Unique customer identifier."
+        data_tests:
+          - unique
+          - not_null
