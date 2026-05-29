@@ -10,10 +10,6 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: read
-  id-token: write   # required for Snowflake OIDC auth
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,8 +17,10 @@ jobs:
 
     env:
       SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-      SNOWFLAKE_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}   # DE214_DEMO
-      SNOWFLAKE_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA }}       # PROD
+      SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+      SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+      SNOWFLAKE_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
+      SNOWFLAKE_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA }}
 
     steps:
       - name: Checkout repository
@@ -44,13 +42,11 @@ jobs:
 
       - name: Install Snowflake CLI
         uses: snowflakedb/snowflake-cli-action@v2.0
-        with:
-          use-oidc: true   # CLI searches for OIDC users matching this subject
 
       - name: Check Snowflake CLI version
         run: snow --version
 
-      # -x is shorthand for --temporary-connection (uses OIDC env vars above)
+      # -x is shorthand for --temporary-connection
       - name: Test the Snowflake connection
         run: snow connection test -x
 
