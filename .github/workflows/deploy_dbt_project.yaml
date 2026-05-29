@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'dbt_project/**'
   workflow_dispatch:
 
 jobs:
