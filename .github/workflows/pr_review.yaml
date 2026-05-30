@@ -56,7 +56,7 @@ jobs:
         env:
           CHANGED_FILES: ${{ steps.changed.outputs.files }}
         run: |
-          cortex --bypass -p "Use the semantic-view-authoring skill to review these changed semantic view model(s): ${CHANGED_FILES}. Check clause order; that every logical table has a PRIMARY KEY and every join is declared in RELATIONSHIPS; that every metric and dimension has WITH SYNONYMS; that every metric (and any ambiguous fact) has a definition COMMENT; that at least two AI_VERIFIED_QUERIES exist using the unqualified view name. Output a concise markdown review with file:line references and concrete fixes. Do not modify any files." \
+          cortex --allowed-tools "Read" "Grep" -p "Use the semantic-view-authoring skill to review the changed semantic view model(s): ${CHANGED_FILES}. Follow the skill's 'PR Review checklist' and output format. Do not modify any files." \
             > review.md 2>/dev/null || true
           echo "----- review.md -----"; cat review.md
 

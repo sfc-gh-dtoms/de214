@@ -92,6 +92,27 @@ You write everything after the relation name.
 4. `DESCRIBE SEMANTIC VIEW <db>.<schema>.<sv>;` and confirm synonyms/comments
    persisted.
 
+# PR Review checklist (developers and CI)
+
+This is the single source of truth for reviewing a semantic view change - used
+both by developers ("review @sv_x using semantic-view-authoring") and by the CI
+review workflow. Verify each item and report pass/fail with file:line references
+and a concrete fix for every failure:
+
+1. Clause order: TABLES, RELATIONSHIPS, FACTS, DIMENSIONS, METRICS, COMMENT,
+   AI_VERIFIED_QUERIES.
+2. Every logical table has a PRIMARY KEY; every join is declared in RELATIONSHIPS.
+3. Logical tables reference dbt models via `{{ ref(...) }}` (no hard-coded
+   database/schema).
+4. Every dimension and metric has `WITH SYNONYMS`.
+5. Every metric (and any ambiguous fact) has a definition COMMENT; the view has a
+   top-level COMMENT.
+6. At least two AI_VERIFIED_QUERIES, written against the **unqualified** view name.
+7. Internal-only measures marked PRIVATE.
+
+Output: concise markdown titled by the model file, grouped into Pass / Fail, with
+file:line references and a concrete fix for each failure. Do not modify any files.
+
 # Best Practices
 
 - One semantic view per analytic subject area; keep it small and curated.
