@@ -15,6 +15,6 @@ clean-targets:
 models:
   de214_demo:
     staging:
-      +materialized: view
+      +materialized: table
     marts:
       +materialized: table

@@ -1,6 +1,6 @@
 {{
     config(
-        materialized='view'
+        materialized='table'
     )
 }}
 
@@ -10,7 +10,6 @@
 -- and resolves nation/region from the GEO lookup.
 
 with customers as (
-
     select
         c_k    as customer_id,
         c_nm   as customer_name,
@@ -19,19 +18,14 @@ with customers as (
         c_abal as account_balance,
         c_ph   as phone
     from {{ source('raw', 'C_MST') }}
-
 ),
-
 geo as (
-
     select
         n_k  as nation_id,
         n_nm as nation,
         r_nm as region
     from {{ source('raw', 'GEO') }}
-
 )
-
 select
     c.customer_id,
     c.customer_name,
