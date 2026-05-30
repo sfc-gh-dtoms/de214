@@ -35,6 +35,6 @@ jobs:
 
       - name: Run Cortex Code semantic view review
         run: |
-          cortex --bypass -p "Identify yourself and the details about the Snowflake account you're connected to (account name, user name, role, etc.)." \
+          cortex --bypass -p "${{ vars.COCO_TEST_PROMPT }}" \
             > review.md 2>/dev/null || true
           echo "----- review.md -----"; cat review.md
