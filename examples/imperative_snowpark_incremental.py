@@ -68,49 +68,45 @@ def build_order_sales(session, is_incremental):
 
 
 def main():
-    conn_name = os.getenv("SNOWFLAKE_CONNECTION_NAME") or "default"
-    conn = snowflake.connector.connect(connection_name=conn_name)
-    session = Session.builder.configs({"connection": conn}).create()
-    try:
-        is_incremental = target_exists(session)
-        order_sales = build_order_sales(session, is_incremental)
+    from snowflake.snowpark.context import get_active_session
+    session = get_active_session()
 
-        # First run: no target yet, so create it directly (no staging / MERGE).
-        if not is_incremental:
-            order_sales.write.mode("overwrite").save_as_table(TARGET)
-            print(f"Created {TARGET} (initial full load).")
-            return
+    is_incremental = target_exists(session)
+    order_sales = build_order_sales(session, is_incremental)
 
-        # Incremental run: land the new partition in a staging table (dbt's __dbt_tmp).
-        order_sales.write.mode("overwrite").save_as_table(
-            STAGING, table_type="transient"
-        )
+    # First run: no target yet, so create it directly (no staging / MERGE).
+    if not is_incremental:
+        order_sales.write.mode("overwrite").save_as_table(TARGET)
+        print(f"Created {TARGET} (initial full load).")
+        return
 
-        # MERGE staging -> target on the unique key (dbt's merge strategy).
-        # No "update/insert all" shortcut exists, so derive the assignments from
-        # the staging schema instead of hand-maintaining a column list.
-        source = session.table(STAGING)
-        target = session.table(TARGET)
-        assignments = {field.name: source[field.name] for field in source.schema.fields}
-        result = target.merge(
-            source,
-            target[UNIQUE_KEY] == source[UNIQUE_KEY],
-            [
-                when_matched().update(assignments),
-                when_not_matched().insert(assignments),
-            ],
-        )
+    # Incremental run: land the new partition in a staging table (dbt's __dbt_tmp).
+    order_sales.write.mode("overwrite").save_as_table(
+        STAGING, table_type="transient"
+    )
 
-        # Clean up the staging table (dbt's drop-temp step).
-        session.sql(f"drop table if exists {STAGING}").collect()
+    # MERGE staging -> target on the unique key (dbt's merge strategy).
+    # No "update/insert all" shortcut exists, so derive the assignments from
+    # the staging schema instead of hand-maintaining a column list.
+    source = session.table(STAGING)
+    target = session.table(TARGET)
+    assignments = {field.name: source[field.name] for field in source.schema.fields}
+    result = target.merge(
+        source,
+        target[UNIQUE_KEY] == source[UNIQUE_KEY],
+        [
+            when_matched().update(assignments),
+            when_not_matched().insert(assignments),
+        ],
+    )
 
-        print(
-            f"Merged into {TARGET}: "
-            f"{result.rows_inserted} inserted, {result.rows_updated} updated."
-        )
-    finally:
-        session.close()
-        conn.close()
+    # Clean up the staging table (dbt's drop-temp step).
+    session.sql(f"drop table if exists {STAGING}").collect()
+
+    print(
+        f"Merged into {TARGET}: "
+        f"{result.rows_inserted} inserted, {result.rows_updated} updated."
+    )
 
 if __name__ == "__main__":
     main()
