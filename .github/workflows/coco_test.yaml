@@ -1,0 +1,40 @@
+name: Cortex Code Test
+
+# Required repo secrets:
+#   SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure Snowflake connection for Cortex Code
+        run: |
+          mkdir -p ~/.snowflake
+          cat > ~/.snowflake/connections.toml <<EOF
+          [default]
+          account = "${{ secrets.SNOWFLAKE_ACCOUNT }}"
+          user = "${{ secrets.SNOWFLAKE_USER }}"
+          password = "${{ secrets.SNOWFLAKE_PASSWORD }}"
+          EOF
+          chmod 600 ~/.snowflake/connections.toml
+
+      - name: Install Cortex Code CLI
+        run: |
+          curl -LsS https://ai.snowflake.com/static/cc-scripts/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Run Cortex Code semantic view review
+        run: |
+          cortex --bypass -p "Identify yourself and the details about the Snowflake account you're connected to (account name, user name, role, etc.)." \
+            > review.md 2>/dev/null || true
+          echo "----- review.md -----"; cat review.md
