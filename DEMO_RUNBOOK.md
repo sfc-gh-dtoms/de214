@@ -7,18 +7,89 @@ prompts for a clean, repeatable live demo.
 > Snowflake connection: `default` (account DEMO134)
 > Database `DE214_DEMO` with schemas `RAW` (sources), `DEV` (local), `PROD` (CI/CD).
 
+## 1. Data Engineering
 
-## 1. dbt Python Models
+### Slides
 
-### Overview
+Go through slide content.
 
-Show the project structure (under `dbt_project/`) and that **Python and SQL
-models coexist**:
 
-- SQL model: `models/staging/stg_customers.sql`
-- Snowpark Python models: `models/staging/stg_orders.py`, `stg_lineitems.py`,
-  `models/marts/mart_customer_sales.py`
-- **Declarative incremental Python**: `models/marts/mart_order_sales.py`
+## 2. dbt Python Models
+
+### Slides
+
+Go through slide content.
+
+### Demo overview
+
+*Note: Start in Snowsight with Workspaces.*
+
+* Brief overview of Workspaces
+* Show empty `DEV` and `PROD` database
+* Show `RAW` schema and explain challenge
+* Brief overview of Cortex Code in Snowsight
+
+### AI Agent analysis 1
+In a Cortex Code session pointed at the demo account, ask about the **raw** tables:
+
+> Using only the tables in DE214_DEMO.RAW, what is total revenue by customer market segment? Do not look at any files in this workspace.
+
+Expected: the agent struggles with cryptic names (`C_MST.c_seg`, `ORD_HDR.o_tot`,
+`LN_ITM.l_xprc/l_disc`), guesses joins, and has no idea what "revenue" means.
+
+Here's query it gave me:
+```sql
+SELECT
+    c.C_SEG AS MARKET_SEGMENT,
+    SUM(l.L_XPRC * (1 - l.L_DISC)) AS TOTAL_REVENUE
+FROM DE214_DEMO.RAW.LN_ITM l
+JOIN DE214_DEMO.RAW.ORD_HDR o ON l.L_ORD = o.O_K
+JOIN DE214_DEMO.RAW.C_MST c ON o.O_CUST = c.C_K
+GROUP BY c.C_SEG
+ORDER BY TOTAL_REVENUE DESC
+```
+
+| MARKET_SEGMENT | TOTAL_REVENUE |
+| --- | --- |
+| BUILDING | 44,141,243,552.35 |
+| HOUSEHOLD | 43,645,871,354.68 |
+| FURNITURE | 43,570,497,982.24 |
+| MACHINERY | 43,462,016,360.30 |
+| AUTOMOBILE | 43,282,594,635.42 |
+
+### Project walkthrough
+
+*Note: Start in Snowsight with Workspaces.*
+
+* Walkthrough the project structure (under `dbt_project/`)
+   * Highlight that **Python and SQL models coexist**
+   * Macros and aligning dbt with your zones
+* Run dbt compile and view the DAG (deps first if needed)
+   * Controls
+   * Column level lineage!
+* Run the entire dbt project
+* Show database objects
+
+
+### AI Agent analysis 2
+Point Cortex Code at the **clean mart** (no semantic view yet):
+
+> Using only the tables in DE214_DEMO.DEV, what is total net revenue by market segment? Do not look at any files in this workspace, and do not look at any other objects in the database including the semantic view.
+
+Expected trap: `mart_order_sales` has BOTH `order_total` (header, includes tax)
+and `net_revenue` (line-derived). A naive agent may `SUM(order_total)`, or join
+`mart_order_sales` to customers/lines and double-count. The "right" answer is not
+knowable from column names alone.
+
+```sql
+SELECT MARKET_SEGMENT, SUM(NET_REVENUE) AS TOTAL_NET_REVENUE
+FROM DE214_DEMO.DEV.MART_ORDER_SALES o
+JOIN DE214_DEMO.DEV.STG_CUSTOMERS c ON o.CUSTOMER_ID = c.CUSTOMER_ID
+GROUP BY MARKET_SEGMENT
+ORDER BY TOTAL_NET_REVENUE DESC
+```
+
+Got same revenue :(
 
 ### Incremental Python Pipelines
 
@@ -43,7 +114,7 @@ snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE21
 ```
 
 
-## 2. Semantic Layers
+## 3. Semantic Layers
 
 The story has **two "aha" moments**:
 
@@ -54,25 +125,10 @@ The story has **two "aha" moments**:
 
 ### Moment 1 - the agent fumbles raw data (DE value)
 
-In a Cortex Code session pointed at the demo account, ask about the **raw** tables:
-
-> Using the tables in DE214_DEMO.RAW, what is total revenue by customer market segment?
-
-Expected: the agent struggles with cryptic names (`C_MST.c_seg`, `ORD_HDR.o_tot`,
-`LN_ITM.l_xprc/l_disc`), guesses joins, and has no idea what "revenue" means.
-
 Then show the dbt transformation that fixes naming: `RAW` -> `stg_*` -> `mart_*`.
 
 ### Moment 2 - clean names still aren't enough (semantic value)
 
-Point Cortex Code at the **clean mart** (no semantic view yet):
-
-> Using DE214_DEMO.DEV.mart_order_sales, what is total net revenue by market segment?
-
-Expected trap: `mart_order_sales` has BOTH `order_total` (header, includes tax)
-and `net_revenue` (line-derived). A naive agent may `SUM(order_total)`, or join
-`mart_order_sales` to customers/lines and double-count. The "right" answer is not
-knowable from column names alone.
 
 Now show the **semantic view** (`models/marts/sv_sales_analytics.sql`) and query it:
 
@@ -93,7 +149,7 @@ DESCRIBE SEMANTIC VIEW DE214_DEMO.DEV.sv_sales_analytics;
 ```
 
 
-## 3. Cortex Code
+## 4. Cortex Code
 
 ### Review AGENTS.md and custom Skill
 
@@ -117,7 +173,7 @@ snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE21
   run --select sv_customer_analytics --target dev
 ```
 
-## 4. DevOps
+## 5. DevOps
 
 ### Overview
 
@@ -133,7 +189,8 @@ snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE21
 TODO: Add details here
 
 
-## Reset between runs
+## 6. Appendix
+### Reset between runs
 
 ```bash
 # From repo root: remove simulated orders + drop DEV models (keeps RAW intact)
@@ -143,7 +200,7 @@ snow sql -f scripts/99_reset.sql
 Full teardown: `snow sql -q "DROP DATABASE DE214_DEMO;"` then re-run setup.
 
 
-## One-time setup
+### One-time setup
 
 First create the conda environment with:
 
