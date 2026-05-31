@@ -50,9 +50,9 @@ DIMENSIONS (
 )
 
 METRICS (
-    orders.total_revenue AS SUM(orders.net_revenue)
+    orders.total_revenue AS SUM(CASE WHEN orders.order_status = 'F' THEN orders.net_revenue ELSE 0 END)
         WITH SYNONYMS = ('revenue', 'net revenue', 'total sales', 'total net revenue')
-        COMMENT = 'Official revenue: SUM of line-derived net revenue (net of discount, excludes tax).',
+        COMMENT = 'Official revenue: line-derived net revenue (net of discount, excludes tax) for FINALIZED orders only (order_status = F). This governance rule is not knowable from the mart columns alone.',
     orders.order_count AS COUNT(orders.order_id)
         WITH SYNONYMS = ('number of orders', 'order volume', 'count of orders'),
     orders.avg_order_value AS SUM(orders.net_revenue) / NULLIF(COUNT(orders.order_id), 0)
