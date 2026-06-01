@@ -18,3 +18,7 @@ models:
       +materialized: table
     marts:
       +materialized: table
+      # Disabled initially: start with no semantic view so the agent answers
+      # from the raw mart, then flip to +enabled: true in semantic view section.
+      sv_sales_analytics:
+        +enabled: false

@@ -12,13 +12,13 @@ Go through slide content.
 
 ## 2. dbt Python Models
 
+*Note: Use Snowsight/Workspaces for this section.*
+
 ### Slides
 
 Go through slide content.
 
 ### Project walkthrough
-
-*Note: Start in Snowsight with Workspaces.*
 
 * Brief overview of Workspaces
 * Show empty `DEV` and `PROD` database
@@ -62,25 +62,17 @@ Then show exactly what happens during this process
 
 ## 3. Semantic Layers
 
+*Note: Use Snowsight/Workspaces for this section.*
+
 ### Slides
 
 Go through slide content.
-
-### Code walkthrough
-
-*Note: Still in Workspaces.*
-
-* Show Semantic View model in dbt
-* Show SV in Horizon Catalog explorer
-* Briefly show how to open the SV in Cortex Analyst??
-
-Question: Should I show the sample semantic YAMLs in the examples folder?
 
 ### SV Benefit Before
 
 Start a new Cortex Code session and enter this prompt:
 
-> Using only the dbt-built tables in DE214_DEMO.DEV (mart_order_sales joined to stg_customers for segment), what is total net revenue by market segment? Do not look at any files in this workspace, and do not look at any other objects in the database including the semantic view. Show your SQL.
+> Using the dbt-built tables in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
 
 This should be the result:
 
@@ -102,6 +94,14 @@ ORDER BY TOTAL_NET_REVENUE DESC
 | FURNITURE | 43,570,497,982.24 |
 | MACHINERY | 43,462,016,360.30 |
 | AUTOMOBILE | 43,282,594,635.42 |
+
+### Code walkthrough
+
+* Show Semantic View model in dbt
+* Update `dbt_project.yml` config and deploy SV
+* Show SV in Horizon Catalog explorer
+* Briefly show how to open the SV in Cortex Analyst??
+* Show the sample semantic YAMLs in the examples folder??
 
 ### SV Benefit After
 
@@ -131,13 +131,13 @@ FROM SEMANTIC_VIEW(
 
 ## 4. Cortex Code
 
+*Note: Use Cortex Desktop for this section.*
+
 ### Slides
 
 Go through slide content.
 
 ### Code walkthrough
-
-*Note: Use Cortex Desktop for this section.*
 
 * Introduce Cortex Desktop
 * Review AGENTS.md and custom Skill in repo
