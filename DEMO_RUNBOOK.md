@@ -27,6 +27,7 @@ Go through slide content.
 * Walkthrough the project structure (under `dbt_project/`)
    * Highlight that **Python and SQL models coexist**
    * Macros and aligning dbt with your zones
+* Run dbt deps with EAI
 * Run dbt compile and view the DAG (deps first if needed)
    * Controls
    * Column level lineage!
@@ -35,25 +36,10 @@ Go through slide content.
 
 ### Incremental Python Pipelines
 
-First add new orders records:
+* Run the `scripts/01_simulate_new_orders.sql` script
+* Re-run affected dbt models with `dbt run --select stg_orders stg_lineitems mart_order_sales --target dev`
 
-```bash
-# From repo root: add one "new day" of orders
-snow sql -f scripts/01_simulate_new_orders.sql
-```
-
-Then run the dbt models with either of these commands:
-
-```bash
-dbt run --select stg_orders stg_lineitems mart_order_sales --target dev
-
-# or
-
-snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE214_DEMO \
-  run --select stg_orders stg_lineitems mart_order_sales --target dev
-```
-
-Then show exactly what happens during this process
+Then show exactly what happens during this process:
 
 * Start with Query History
 * Then open and walkthrough the `examples/dbt_python_snowpark_incremental_example.md` file
@@ -72,19 +58,17 @@ Go through slide content.
 
 Start a new Cortex Code session and enter this prompt:
 
-> Using the dbt-built tables in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
+> Using the objects in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
 
 This should be the result:
 
 ```sql
 SELECT
-    c.MARKET_SEGMENT,
-    SUM(o.NET_REVENUE) AS TOTAL_NET_REVENUE
-FROM DE214_DEMO.DEV.MART_ORDER_SALES o
-JOIN DE214_DEMO.DEV.STG_CUSTOMERS c
-    ON o.CUSTOMER_ID = c.CUSTOMER_ID
-GROUP BY c.MARKET_SEGMENT
-ORDER BY TOTAL_NET_REVENUE DESC
+    MARKET_SEGMENT,
+    SUM(NET_REVENUE) AS TOTAL_REVENUE
+FROM DE214_DEMO.DEV.MART_CUSTOMER_SALES
+GROUP BY MARKET_SEGMENT
+ORDER BY TOTAL_REVENUE DESC
 ```
 
 | MARKET_SEGMENT | TOTAL_NET_REVENUE |
@@ -98,16 +82,18 @@ ORDER BY TOTAL_NET_REVENUE DESC
 ### Code walkthrough
 
 * Show Semantic View model in dbt
-* Update `dbt_project.yml` config and deploy SV
+* Update `dbt_project.yml` config and deploy SV with `dbt run --select sv_sales_analytics --target dev`
 * Show SV in Horizon Catalog explorer
 * Briefly show how to open the SV in Cortex Analyst??
 * Show the sample semantic YAMLs in the examples folder??
+
+TODO: Figure out plan for last two questionable steps here
 
 ### SV Benefit After
 
 Start a new Cortex Code session and enter this prompt:
 
-> Using the semantic view DE214_DEMO.DEV.sv_sales_analytics, what is total revenue by market segment? Show your SQL.
+> Using the objects in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
 
 This should be the result:
 
@@ -176,13 +162,20 @@ snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE21
 ## 6. Appendix
 ### Reset between runs
 
+1. Drop database objects with `scripts/99_reset.sql`
+1. Delete old Cortex Code sessions
+1. Open CoCo Desktop, open terminal, `conda activate de214`
+
+
+If running locally:
+
 ```bash
 # From repo root: remove simulated orders + drop DEV models (keeps RAW intact)
 snow sql -f scripts/99_reset.sql
+
+# Or a full teardown with (followed by re-running the setup)
+snow sql -q "DROP DATABASE DE214_DEMO;"
 ```
-
-Full teardown: `snow sql -q "DROP DATABASE DE214_DEMO;"` then re-run setup.
-
 
 ### One-time setup
 

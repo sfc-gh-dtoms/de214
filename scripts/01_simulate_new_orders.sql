@@ -9,6 +9,8 @@
 -- Re-runnable: it first removes any previously inserted synthetic rows
 -- (order keys >= 9000000000) before re-inserting them.
 -- The synthetic order date (1998-08-03) is one day after the TPC-H max.
+--
+--   dbt run --select stg_orders stg_lineitems mart_order_sales --target dev
 -- =============================================================================
 
 USE ROLE DEMO_ROLE;
