@@ -158,6 +158,7 @@ TODO: Decide about merging to main (sv file and dbt_project.yml change)
 
 1. Drop database objects with `scripts/99_reset.sql`
 1. Delete old Cortex Code sessions
+1. Update repo (remove `sv_customer_analytics.py` and reset `dbt_project.yml`)
 1. Open CoCo Desktop, open terminal, `conda activate de214`
 1. Login to Snowsight
 1. Open GitHub repo
