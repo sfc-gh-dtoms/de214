@@ -23,15 +23,16 @@ Go through slide content.
 * Brief overview of Workspaces
 * Show empty `DEV` and `PROD` database
 * Show `RAW` schema and explain challenge
-* Brief overview of Cortex Code in Snowsight
 * Walkthrough the project structure (under `dbt_project/`)
    * Highlight that **Python and SQL models coexist**
+   * Python models since dbt Core 1.3 (October 2022)
    * Macros and aligning dbt with your zones
 * Run dbt deps with EAI
 * Run dbt compile and view the DAG (deps first if needed)
+* Run the entire dbt project (move on to next item while this is running)
+* Show Workspaces dbt features
    * Controls
    * Column level lineage!
-* Run the entire dbt project
 * Show database objects
 
 ### Incremental Python Pipelines
@@ -56,7 +57,8 @@ Go through slide content.
 
 ### SV Benefit Before
 
-Start a new Cortex Code session and enter this prompt:
+* Brief overview of Cortex Code in Snowsight
+* Start a new Cortex Code session and enter this prompt:
 
 > Using the objects in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
 
@@ -93,7 +95,7 @@ TODO: Figure out plan for last two questionable steps here
 
 Start a new Cortex Code session and enter this prompt:
 
-> Using the objects in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
+> Using the semantic view in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
 
 This should be the result:
 
@@ -130,22 +132,12 @@ Go through slide content.
 
 ### Create new semantic view using the skill
 
-**First, start by creating a new branch.**
+1. Creating a new branch.
+1. Use this prompt (and Skill) to build new `sv_customer_analytics` SV:
 
-Then use this prompt (and Skill) to build the Semantic View:
+> /semantic-view-authoring Create a new semantic view at 'dbt_project/models/marts/sv_customer_analytics.sql' over 'mart_customer_sales' at customer grain. It should answer questions like "who are the top customers by revenue" and "revenue and customer counts by market segment, nation, and region." Follow the team's metadata standards, then run the skill's validation workflow.
 
-> Use the semantic-view-authoring skill to create a new semantic view at 'dbt_project/models/marts/sv_customer_analytics.sql' over 'mart_customer_sales' at customer grain. It should answer questions like "who are the top customers by revenue" and "revenue and customer counts by market segment, nation, and region." Follow the team's metadata standards, then run the skill's validation workflow.
-
-Finally, run/deploy the new dbt model with either of these commands:
-
-```bash
-dbt run --select sv_customer_analytics --target dev
-
-# or
-
-snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE214_DEMO \
-  run --select sv_customer_analytics --target dev
-```
+3. Run/deploy the new dbt model with this command: `dbt run --select sv_customer_analytics --target dev`
 
 
 ## 5. DevOps
@@ -158,6 +150,8 @@ snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE21
 * Walkthrough GitHub Actions workflow in `.github/workflows` (while waiting)
 * Show everything deployed to `PROD` in Snowsight/Horizon
 
+TODO: Decide about merging to main (sv file and dbt_project.yml change)
+
 
 ## 6. Appendix
 ### Reset between runs
@@ -165,16 +159,26 @@ snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE21
 1. Drop database objects with `scripts/99_reset.sql`
 1. Delete old Cortex Code sessions
 1. Open CoCo Desktop, open terminal, `conda activate de214`
+1. Login to Snowsight
+1. Open GitHub repo
 
+TODO: Add steps to undo changes merged to main (sv file and dbt_project.yml change)
 
-If running locally:
+### To run locally
+
+Use these commands to run things locally:
 
 ```bash
-# From repo root: remove simulated orders + drop DEV models (keeps RAW intact)
+# To run a script
 snow sql -f scripts/99_reset.sql
 
-# Or a full teardown with (followed by re-running the setup)
-snow sql -q "DROP DATABASE DE214_DEMO;"
+# To run dbt
+dbt run --select sv_customer_analytics --target dev
+
+# To work with dbt via Snowflake CLI
+snow dbt deploy DE214_DEMO --source . --database DE214_DEMO --schema DEV
+snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE214_DEMO run --target dev
+snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE214_DEMO run --select sv_customer_analytics --target dev
 ```
 
 ### One-time setup

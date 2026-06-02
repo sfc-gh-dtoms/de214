@@ -1,0 +1,21 @@
+-------------------------------------------------------------------
+dbt
+-------------------------------------------------------------------
+dbt run --select stg_orders stg_lineitems mart_order_sales --target dev
+
+-------------------------------------------------------------------
+Semantic Views
+-------------------------------------------------------------------
+CoCo Prompt #1:
+Using the objects in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
+
+dbt run --select sv_sales_analytics --target dev
+
+CoCo Prompt #2:
+Using the semantic view in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
+
+-------------------------------------------------------------------
+Cortex Code
+-------------------------------------------------------------------
+CoCo Prompt:
+/semantic-view-authoring Create a new semantic view at 'dbt_project/models/marts/sv_customer_analytics.sql' over 'mart_customer_sales' at customer grain. It should answer questions like "who are the top customers by revenue" and "revenue and customer counts by market segment, nation, and region." Follow the team's metadata standards, then run the skill's validation workflow.
