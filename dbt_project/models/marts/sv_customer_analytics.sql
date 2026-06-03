@@ -14,7 +14,7 @@ FACTS (
     customers.order_total AS customers.order_total
         COMMENT = 'Customer lifetime header total: includes tax. NOT the official revenue metric.',
     customers.order_count AS customers.order_count
-        COMMENT = 'Total number of distinct orders placed by this customer.',
+        COMMENT = 'Total number of distinct orders placed by this customer. Foo.',
     customers.total_quantity AS customers.total_quantity
         COMMENT = 'Total line-item quantity ordered by this customer across all orders.'
 )
