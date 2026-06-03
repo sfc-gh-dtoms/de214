@@ -19,3 +19,5 @@ Cortex Code
 -------------------------------------------------------------------
 CoCo Prompt:
 /semantic-view-authoring Create a new semantic view at 'dbt_project/models/marts/sv_customer_analytics.sql' over 'mart_customer_sales' at customer grain. It should answer questions like "who are the top customers by revenue" and "revenue and customer counts by market segment, nation, and region." Follow the team's metadata standards, then run the skill's validation workflow.
+
+dbt run --select sv_customer_analytics --target dev

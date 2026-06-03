@@ -27,7 +27,7 @@ Go through slide content.
    * Highlight that **Python and SQL models coexist**
    * Python models since dbt Core 1.3 (October 2022)
    * Macros and aligning dbt with your zones
-* Run dbt deps with EAI
+* Run dbt deps with EAI (in setup below)
 * Run dbt compile and view the DAG (deps first if needed)
 * Run the entire dbt project (move on to next item while this is running)
 * Show Workspaces dbt features
@@ -86,10 +86,6 @@ ORDER BY TOTAL_REVENUE DESC
 * Show Semantic View model in dbt
 * Update `dbt_project.yml` config and deploy SV with `dbt run --select sv_sales_analytics --target dev`
 * Show SV in Horizon Catalog explorer
-* Briefly show how to open the SV in Cortex Analyst??
-* Show the sample semantic YAMLs in the examples folder??
-
-TODO: Figure out plan for last two questionable steps here
 
 ### SV Benefit After
 
@@ -159,6 +155,7 @@ TODO: Decide about merging to main (sv file and dbt_project.yml change)
 1. Drop database objects with `scripts/99_reset.sql`
 1. Delete old Cortex Code sessions
 1. Update repo (remove `sv_customer_analytics.py` and reset `dbt_project.yml`)
+1. Run dbt deps with EAI
 1. Open CoCo Desktop, open terminal, `conda activate de214`
 1. Login to Snowsight
 1. Open GitHub repo
