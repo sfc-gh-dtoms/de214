@@ -12,7 +12,7 @@ clean analytics layer and publishes a Snowflake **Semantic View** for AI agents 
 ## Environment & connection
 
 - Local Python env: conda env `de214` at `/opt/homebrew/Caskroom/miniconda/base/envs/de214/bin`.
-- Snowflake connection: **`default`** (account DEMO134); no `-c` flag needed.
+- Snowflake connection: **`default`**; no `-c` flag needed.
 - **Never** read or print `profiles.yml`, `~/.dbt/profiles.yml`, or `connections.toml` — may contain secrets.
 
 ## Database & schema layout

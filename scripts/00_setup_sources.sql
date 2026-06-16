@@ -3,7 +3,7 @@
 -- Builds the DE214_DEMO database, its RAW / DEV / PROD schemas, and loads
 -- OBFUSCATED source tables from the TPC-H sample data set.
 --
--- Run against the demo account (DEMO134):
+-- Run against the demo account:
 --   snow sql -f scripts/00_setup_sources.sql
 --
 -- The RAW tables are intentionally cryptic and metadata-poor. This is what an
