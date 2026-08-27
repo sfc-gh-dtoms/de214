@@ -14,19 +14,19 @@ de214_demo:
   outputs:
     dev:
       type: snowflake
-      account: 'not used'
-      user: 'not used'
-      role: DEMO_ROLE
-      warehouse: DEMO_WH
-      database: DE214_DEMO
+      account: SFSEEUROPE-DTOMS_AWS1
+      user: dtoms
+      role: SYSADMIN
+      warehouse: COMPUTE_WH
+      database: DE214
       schema: DEV
       threads: 4
     prod:
       type: snowflake
-      account: 'not used'
-      user: 'not used'
-      role: DEMO_ROLE
-      warehouse: DEMO_WH
-      database: DE214_DEMO
+      account: SFSEEUROPE-DTOMS_AWS1
+      user: dtoms
+      role: SYSADMIN
+      warehouse: COMPUTE_WH
+      database: DE214
       schema: PROD
       threads: 4

@@ -24,11 +24,11 @@ de214_demo:                          # must match `profile:` in dbt_project.yml
   outputs:
     dev:
       type: snowflake
-      account: MY_ACCOUNT
-      user: MY_USER
+      account: SFSEEUROPE-DTOMS_AWS1
+      user: dtoms
       authenticator: externalbrowser  # SSO browser login; no stored secret
-      role: DEMO_ROLE
-      warehouse: DEMO_WH
-      database: DE214_DEMO
+      role: SYSADMIN
+      warehouse: COMPUTE_WH
+      database: DE214
       schema: DEV
       threads: 4
