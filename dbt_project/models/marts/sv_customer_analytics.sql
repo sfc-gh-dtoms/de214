@@ -14,7 +14,7 @@ TABLES (
 
 FACTS (
     customers.net_revenue AS customers.net_revenue
-        WITH SYNONYMS = ('net sales amount', 'total sales amount')
+        WITH SYNONYMS = ('net sales amount')
         COMMENT = 'Line-derived net revenue for this customer: SUM of extended_price * (1 - discount) across all orders. This is the official revenue measure.',
     customers.order_total AS customers.order_total
         COMMENT = 'Sum of TPC-H header order_total for this customer; includes tax. NOT the official revenue metric.',

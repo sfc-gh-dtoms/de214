@@ -1,7 +1,7 @@
 name: Cortex Code Test
 
 # Required repo secrets:
-#   SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD
+#   SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PAT
 
 on:
   workflow_dispatch:
@@ -20,11 +20,14 @@ jobs:
       - name: Configure Snowflake connection for Cortex Code
         run: |
           mkdir -p ~/.snowflake
+          echo -n "${{ secrets.SNOWFLAKE_PAT }}" > ~/.snowflake/pat_token
+          chmod 600 ~/.snowflake/pat_token
           cat > ~/.snowflake/connections.toml <<EOF
           [default]
           account = "${{ secrets.SNOWFLAKE_ACCOUNT }}"
           user = "${{ secrets.SNOWFLAKE_USER }}"
-          password = "${{ secrets.SNOWFLAKE_PASSWORD }}"
+          authenticator = "PROGRAMMATIC_ACCESS_TOKEN"
+          token_file_path = "$HOME/.snowflake/pat_token"
           EOF
           chmod 600 ~/.snowflake/connections.toml
 
@@ -35,6 +38,5 @@ jobs:
 
       - name: Run Cortex Code semantic view review
         run: |
-          cortex --bypass -p "${{ vars.COCO_TEST_PROMPT }}" \
-            > review.md 2>/dev/null || true
+          cortex exec "${{ vars.COCO_TEST_PROMPT }}" --bypass -o review.md
           echo "----- review.md -----"; cat review.md
