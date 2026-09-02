@@ -24,7 +24,7 @@ RELATIONSHIPS (
 
 FACTS (
     orders.net_revenue AS orders.net_revenue
-        WITH SYNONYMS = ('net sales amount')
+        WITH SYNONYMS = ('net sales amount', 'total sales amount')
         COMMENT = 'Line-derived net revenue: extended_price * (1 - discount).',
     orders.order_total AS orders.order_total
         COMMENT = 'TPC-H header price; includes tax. NOT the official revenue metric.',

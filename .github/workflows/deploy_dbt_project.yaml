@@ -1,77 +1,71 @@
-name: Semantic View PR Review (Cortex Code)
+name: Deploy dbt Project
 
-# On PRs that touch a semantic view model, run Cortex Code in batch mode with the
-# project's `semantic-view-authoring` skill to review the change for spec and
-# metadata compliance, and post the findings as a PR comment.
-#
-# NOTE: This is an ADVISORY review only. Deployment is still done exclusively by
-# the Snowflake CLI in deploy_dbt_project.yaml - Cortex Code never deploys.
-#
-# Required repo secrets:
-#   SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PAT
+# Deploys the dbt project object to Snowflake and runs it against the PROD
+# schema. Deployment is done entirely with the Snowflake CLI (repeatable,
+# deterministic) - no AI in the deploy path.
 
 on:
-  pull_request:
+  push:
+    branches:
+      - main
     paths:
-      - 'dbt_project/models/marts/sv_*.sql'
-
-permissions:
-  contents: read
-  pull-requests: write
+      - 'dbt_project/**'
+  workflow_dispatch:
 
 jobs:
-  review:
+  deploy:
     runs-on: ubuntu-latest
+    environment: prod
+
+    env:
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+      SNOWFLAKE_AUTHENTICATOR: PROGRAMMATIC_ACCESS_TOKEN
+      SNOWFLAKE_TOKEN_FILE_PATH: ${{ github.workspace }}/.pat_token
+      SNOWFLAKE_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
+      SNOWFLAKE_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Write PAT to file
+        run: |
+          echo -n "${{ secrets.SNOWFLAKE_PAT }}" > "${{ github.workspace }}/.pat_token"
+          chmod 600 "${{ github.workspace }}/.pat_token"
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
         with:
-          fetch-depth: 0   # need base branch to diff changed files
+          python-version: '3.11'
 
-      - name: Identify changed semantic view models
-        id: changed
+      # Vendor dbt packages into dbt_packages/ so the deploy is self-contained
+      # (no External Access Integration needed inside Snowflake).
+      - name: Install dbt and resolve packages
+        working-directory: dbt_project
         run: |
-          base="origin/${{ github.base_ref }}"
-          files=$(git diff --name-only "$base"...HEAD -- 'dbt_project/models/marts/sv_*.sql' | tr '\n' ' ')
-          echo "files=$files" >> "$GITHUB_OUTPUT"
-          echo "Changed semantic view files: $files"
+          python -m pip install --upgrade pip
+          pip install "dbt-core==1.10.15" "dbt-snowflake==1.10.7"
+          dbt deps --profiles-dir .
 
-      - name: Configure Snowflake connection for Cortex Code
-        run: |
-          mkdir -p ~/.snowflake
-          cat > ~/.snowflake/connections.toml <<EOF
-          [default]
-          account = "${{ secrets.SNOWFLAKE_ACCOUNT }}"
-          user = "${{ secrets.SNOWFLAKE_USER }}"
-          authenticator = "SNOWFLAKE_JWT"
-          token = "${{ secrets.SNOWFLAKE_PAT }}"
-          EOF
-          chmod 600 ~/.snowflake/connections.toml
+      - name: Install Snowflake CLI
+        uses: snowflakedb/snowflake-cli-action@v2.0
 
-      - name: Install Cortex Code CLI
-        run: |
-          curl -LsS https://ai.snowflake.com/static/cc-scripts/install.sh | sh
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Check Snowflake CLI version
+        run: snow --version
 
-      - name: Run Cortex Code semantic view review
-        env:
-          CHANGED_FILES: ${{ steps.changed.outputs.files }}
-        run: |
-          cortex --allowed-tools "Read" "Grep" -p "Use the semantic-view-authoring skill to review the changed semantic view model(s): ${CHANGED_FILES}. Follow the skill's 'PR Review checklist' and output format. Do not modify any files." \
-            > review.md 2>/dev/null || true
-          echo "----- review.md -----"; cat review.md
+      # -x is shorthand for --temporary-connection
+      - name: Test the Snowflake connection
+        run: snow connection test -x
 
-      - name: Post review as PR comment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            let body = '## Semantic View review (Cortex Code)\n\n';
-            try { body += fs.readFileSync('review.md', 'utf8'); }
-            catch (e) { body += '_No review output produced._'; }
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body,
-            });
+      - name: Deploy the dbt project object to ${{ vars.SNOWFLAKE_DATABASE }}.${{ vars.SNOWFLAKE_SCHEMA }}
+        run: snow dbt deploy DE214_DEMO --source dbt_project --force -x
+
+      - name: List dbt project objects
+        run: snow dbt list -x
+
+      - name: Run dbt models against PROD
+        run: snow dbt execute --dbt-version "1.10.15" -x DE214_DEMO run --target prod
+
+      - name: Run dbt tests against PROD
+        run: snow dbt execute --dbt-version "1.10.15" -x DE214_DEMO test --target prod
