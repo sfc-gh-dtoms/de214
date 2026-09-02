@@ -39,11 +39,14 @@ jobs:
       - name: Configure Snowflake connection for Cortex Code
         run: |
           mkdir -p ~/.snowflake
+          echo -n "${{ secrets.SNOWFLAKE_PAT }}" > ~/.snowflake/pat_token
+          chmod 600 ~/.snowflake/pat_token
           cat > ~/.snowflake/connections.toml <<EOF
           [default]
           account = "${{ secrets.SNOWFLAKE_ACCOUNT }}"
           user = "${{ secrets.SNOWFLAKE_USER }}"
-          password = "${{ secrets.SNOWFLAKE_PASSWORD }}"
+          authenticator = "PROGRAMMATIC_ACCESS_TOKEN"
+          token_file_path = "$HOME/.snowflake/pat_token"
           EOF
           chmod 600 ~/.snowflake/connections.toml
 
