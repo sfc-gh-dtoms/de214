@@ -1,7 +1,7 @@
 name: Cortex Code Test
 
 # Required repo secrets:
-#   SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD
+#   SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PAT
 
 on:
   workflow_dispatch:
@@ -24,7 +24,8 @@ jobs:
           [default]
           account = "${{ secrets.SNOWFLAKE_ACCOUNT }}"
           user = "${{ secrets.SNOWFLAKE_USER }}"
-          password = "${{ secrets.SNOWFLAKE_PASSWORD }}"
+          authenticator = "SNOWFLAKE_JWT"
+          token = "${{ secrets.SNOWFLAKE_PAT }}"
           EOF
           chmod 600 ~/.snowflake/connections.toml
 
