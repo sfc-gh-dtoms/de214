@@ -38,6 +38,5 @@ jobs:
 
       - name: Run Cortex Code semantic view review
         run: |
-          cortex --bypass -p "${{ vars.COCO_TEST_PROMPT }}" \
-            > review.md 2>/dev/null || true
+          cortex exec "${{ vars.COCO_TEST_PROMPT }}" --bypass -o review.md
           echo "----- review.md -----"; cat review.md
