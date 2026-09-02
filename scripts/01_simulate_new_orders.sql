@@ -17,11 +17,11 @@ USE ROLE DEMO_ROLE;
 USE WAREHOUSE DEMO_WH;
 
 -- Clean up any prior synthetic rows so this script is idempotent.
-DELETE FROM DE214_DEMO.RAW.LN_ITM  WHERE l_ord >= 9000000000;
-DELETE FROM DE214_DEMO.RAW.ORD_HDR WHERE o_k  >= 9000000000;
+DELETE FROM DE214.RAW.LN_ITM  WHERE l_ord >= 9000000000;
+DELETE FROM DE214.RAW.ORD_HDR WHERE o_k  >= 9000000000;
 
 -- 10 brand-new orders dated one day past the TPC-H max date.
-INSERT INTO DE214_DEMO.RAW.ORD_HDR (o_k, o_cust, o_dt, o_sts, o_tot, o_prio)
+INSERT INTO DE214.RAW.ORD_HDR (o_k, o_cust, o_dt, o_sts, o_tot, o_prio)
 SELECT
     9000000000 + seq AS o_k,
     c_k               AS o_cust,
@@ -31,12 +31,12 @@ SELECT
     '3-MEDIUM'        AS o_prio
 FROM (
     SELECT ROW_NUMBER() OVER (ORDER BY c_k) AS seq, c_k
-    FROM DE214_DEMO.RAW.C_MST
+    FROM DE214.RAW.C_MST
     LIMIT 10
 );
 
 -- 2 line items per new order.
-INSERT INTO DE214_DEMO.RAW.LN_ITM (l_ord, l_ln, l_qty, l_xprc, l_disc, l_tax, l_rf, l_shipdt)
+INSERT INTO DE214.RAW.LN_ITM (l_ord, l_ln, l_qty, l_xprc, l_disc, l_tax, l_rf, l_shipdt)
 SELECT
     o_k                          AS l_ord,
     ln                           AS l_ln,
@@ -46,8 +46,8 @@ SELECT
     0.08                         AS l_tax,
     'N'                          AS l_rf,
     DATE '1998-08-05'            AS l_shipdt
-FROM DE214_DEMO.RAW.ORD_HDR
+FROM DE214.RAW.ORD_HDR
 CROSS JOIN (SELECT 1 AS ln UNION ALL SELECT 2) lines
 WHERE o_k >= 9000000000;
 
-SELECT COUNT(*) AS new_orders FROM DE214_DEMO.RAW.ORD_HDR WHERE o_k >= 9000000000;
+SELECT COUNT(*) AS new_orders FROM DE214.RAW.ORD_HDR WHERE o_k >= 9000000000;

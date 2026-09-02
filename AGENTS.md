@@ -17,7 +17,7 @@ clean analytics layer and publishes a Snowflake **Semantic View** for AI agents 
 
 ## Database & schema layout
 
-Database `DE214_DEMO` with three schemas:
+Database `DE214` with three schemas:
 - `RAW`  - obfuscated source tables (loaded by `scripts/00_setup_sources.sql`).
 - `DEV`  - local/iterative dbt target.
 - `PROD` - CI/CD deploy target.
@@ -70,9 +70,9 @@ Requires `DBT_PROFILES_DIR=$HOME/.dbt`. Seed `~/.dbt/profiles.yml` once from `db
 ```bash
 BIN=/opt/homebrew/Caskroom/miniconda/base/envs/de214/bin
 cd dbt_project
-$BIN/snow dbt deploy DE214_DEMO --source . --database DE214_DEMO --schema DEV
-$BIN/snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE214_DEMO run --target dev
-$BIN/snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE214_DEMO test --target dev
+$BIN/snow dbt deploy DE214 --source . --database DE214 --schema DEV
+$BIN/snow dbt execute --dbt-version "1.10.15" --database DE214 --schema DEV DE214 run --target dev
+$BIN/snow dbt execute --dbt-version "1.10.15" --database DE214 --schema DEV DE214 test --target dev
 ```
 
 ## Hard rules

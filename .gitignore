@@ -1,28 +1,4 @@
-# --- dbt (project lives in dbt_project/) ---
-dbt_project/target/
-dbt_project/dbt_packages/
-dbt_project/logs/
-dbt_project/.user.yml
-# also ignore these anywhere, in case dbt is run from another cwd
+# Ignore dbt artifacts
 target/
-dbt_packages/
+dbt_modules/
 logs/
-.user.yml
-
-# --- Python / conda ---
-__pycache__/
-*.py[cod]
-.venv/
-.ipynb_checkpoints/
-
-# --- OS / editor ---
-.DS_Store
-*.swp
-
-# --- Cortex Code tooling state (auto-generated plans, session state) ---
-.snowflake/
-
-# --- Local secrets (never commit) ---
-# profiles.yml here intentionally has no secrets, but guard the usual suspects:
-**/connections.toml
-.env

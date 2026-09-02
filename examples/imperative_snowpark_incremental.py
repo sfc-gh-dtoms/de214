@@ -10,7 +10,7 @@ import snowflake.connector
 from snowflake.snowpark import Session, functions as F
 from snowflake.snowpark.functions import when_matched, when_not_matched
 
-DATABASE = "DE214_DEMO"
+DATABASE = "DE214"
 SCHEMA = "DEV"
 TARGET = f"{DATABASE}.{SCHEMA}.mart_order_sales"
 STAGING = f"{DATABASE}.{SCHEMA}.mart_order_sales__stage"

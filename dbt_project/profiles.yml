@@ -5,9 +5,9 @@
 # user's context once the project runs inside Snowflake.
 #
 # Two targets share one database and differ only by schema:
-#   dev  -> DE214_DEMO.DEV   (local / iterative builds)
-#   prod -> DE214_DEMO.PROD  (CI/CD deploys here)
-# Source (obfuscated) tables live in DE214_DEMO.RAW.
+#   dev  -> DE214.DEV   (local / iterative builds)
+#   prod -> DE214.PROD  (CI/CD deploys here)
+# Source (obfuscated) tables live in DE214.RAW.
 
 de214_demo:
   target: dev

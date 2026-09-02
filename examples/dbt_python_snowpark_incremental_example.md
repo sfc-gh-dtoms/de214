@@ -13,8 +13,8 @@ Below are the queries that executed in Snowflake as a result of running `dbt run
 ## Step 1: Check if table exists
 
 ```sql
-show objects in DE214_DEMO.DEV limit 10000
-/* {"app": "dbt", "dbt_version": "1.10.15", "profile_name": "de214_demo", "target_name": "dev", "connection_name": "list_DE214_DEMO_DEV"} */;
+show objects in DE214.DEV limit 10000
+/* {"app": "dbt", "dbt_version": "1.10.15", "profile_name": "de214_demo", "target_name": "dev", "connection_name": "list_DE214_DEV"} */;
 ```
 
 ## Step 2: dbt generated anonymous Python stored procedure
@@ -98,8 +98,8 @@ def model(dbt, session):
 
 def ref(*args, **kwargs):
     refs = {
-        "stg_lineitems": "DE214_DEMO.DEV.stg_lineitems",
-        "stg_orders": "DE214_DEMO.DEV.stg_orders",
+        "stg_lineitems": "DE214.DEV.stg_lineitems",
+        "stg_orders": "DE214.DEV.stg_orders",
     }
     key = '.'.join(args)
     version = kwargs.get("v") or kwargs.get("version")
@@ -130,12 +130,12 @@ class config:
 
 class this:
     """dbt.this() or dbt.this.identifier"""
-    database = "DE214_DEMO"
+    database = "DE214"
     schema = "DEV"
     identifier = "mart_order_sales"
 
     def __repr__(self):
-        return 'DE214_DEMO.DEV.mart_order_sales'
+        return 'DE214.DEV.mart_order_sales'
 
 class dbtObj:
     def __init__(self, load_df_function) -> None:
@@ -160,7 +160,7 @@ def materialize(session, df, target_relation):
             df = session.createDataFrame(df)
 
     df.write.mode("overwrite").save_as_table(
-        'DE214_DEMO.DEV.mart_order_sales__dbt_tmp', table_type='transient'
+        'DE214.DEV.mart_order_sales__dbt_tmp', table_type='transient'
     )
 
 def main(session):
@@ -176,13 +176,13 @@ def main(session):
 ## Step 2a: Query to find max order date
 
 ```sql
-select max(order_date) as max_date from DE214_DEMO.DEV.mart_order_sales
+select max(order_date) as max_date from DE214.DEV.mart_order_sales
 ```
 
 ## Step 2b: The df.write.mode("overwrite").save_as_table()
 
 ```sql
-CREATE OR REPLACE TRANSIENT TABLE DE214_DEMO.DEV.mart_order_sales__dbt_tmp (
+CREATE OR REPLACE TRANSIENT TABLE DE214.DEV.mart_order_sales__dbt_tmp (
     "ORDER_ID"       BIGINT,
     "CUSTOMER_ID"    BIGINT,
     "ORDER_DATE"     DATE,
@@ -214,7 +214,7 @@ FROM (
         FROM (
             (
                 SELECT *
-                FROM DE214_DEMO.DEV.stg_orders
+                FROM DE214.DEV.stg_orders
             ) AS SNOWPARK_LEFT
             INNER JOIN (
                 SELECT
@@ -226,7 +226,7 @@ FROM (
                     COUNT("LINE_NUMBER")                                AS "LINE_COUNT"
                 FROM (
                     SELECT *
-                    FROM DE214_DEMO.DEV.stg_lineitems
+                    FROM DE214.DEV.stg_lineitems
                 )
                 GROUP BY "ORDER_ID"
             ) AS SNOWPARK_RIGHT
@@ -243,8 +243,8 @@ FROM (
 begin
 /* {"app": "dbt", "dbt_version": "1.10.15", "profile_name": "de214_demo", "target_name": "dev", "node_id": "model.de214_demo.mart_order_sales"} */;
 
-MERGE INTO DE214_DEMO.DEV.mart_order_sales AS DBT_INTERNAL_DEST
-USING DE214_DEMO.DEV.mart_order_sales__dbt_tmp AS DBT_INTERNAL_SOURCE
+MERGE INTO DE214.DEV.mart_order_sales AS DBT_INTERNAL_DEST
+USING DE214.DEV.mart_order_sales__dbt_tmp AS DBT_INTERNAL_SOURCE
     ON (DBT_INTERNAL_SOURCE.order_id = DBT_INTERNAL_DEST.order_id)
 WHEN MATCHED THEN UPDATE SET
     "ORDER_ID"       = DBT_INTERNAL_SOURCE."ORDER_ID",
@@ -294,6 +294,6 @@ COMMIT
 ## Step 4: Clean-up
 
 ```sql
-drop table if exists DE214_DEMO.DEV.mart_order_sales__dbt_tmp cascade
+drop table if exists DE214.DEV.mart_order_sales__dbt_tmp cascade
 /* {"app": "dbt", "dbt_version": "1.10.15", "profile_name": "de214_demo", "target_name": "dev", "node_id": "model.de214_demo.mart_order_sales"} */
 ```

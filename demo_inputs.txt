@@ -7,12 +7,12 @@ dbt run --select stg_orders stg_lineitems mart_order_sales --target dev
 Semantic Views
 -------------------------------------------------------------------
 CoCo Prompt #1:
-Using the objects in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
+Using the objects in DE214.DEV, what is total revenue by market segment? Show your SQL.
 
 dbt run --select sv_sales_analytics --target dev
 
 CoCo Prompt #2:
-Using the semantic view in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
+Using the semantic view in DE214.DEV, what is total revenue by market segment? Show your SQL.
 
 -------------------------------------------------------------------
 Cortex Code
