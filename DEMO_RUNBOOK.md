@@ -60,7 +60,7 @@ Go through slide content.
 * Brief overview of Cortex Code in Snowsight
 * Start a new Cortex Code session and enter this prompt:
 
-> Using the objects in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
+> Using the objects in DE214.DEV, what is total revenue by market segment? Show your SQL.
 
 This should be the result:
 
@@ -68,7 +68,7 @@ This should be the result:
 SELECT
     MARKET_SEGMENT,
     SUM(NET_REVENUE) AS TOTAL_REVENUE
-FROM DE214_DEMO.DEV.MART_CUSTOMER_SALES
+FROM DE214.DEV.MART_CUSTOMER_SALES
 GROUP BY MARKET_SEGMENT
 ORDER BY TOTAL_REVENUE DESC
 ```
@@ -91,14 +91,14 @@ ORDER BY TOTAL_REVENUE DESC
 
 Start a new Cortex Code session and enter this prompt:
 
-> Using the semantic view in DE214_DEMO.DEV, what is total revenue by market segment? Show your SQL.
+> Using the semantic view in DE214.DEV, what is total revenue by market segment? Show your SQL.
 
 This should be the result:
 
 ```sql
 SELECT *
 FROM SEMANTIC_VIEW(
-    DE214_DEMO.DEV.SV_SALES_ANALYTICS
+    DE214.DEV.SV_SALES_ANALYTICS
     METRICS total_revenue
     DIMENSIONS customers.market_segment
 );
@@ -174,9 +174,9 @@ snow sql -f scripts/99_reset.sql
 dbt run --select sv_customer_analytics --target dev
 
 # To work with dbt via Snowflake CLI
-snow dbt deploy DE214_DEMO --source . --database DE214_DEMO --schema DEV
-snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE214_DEMO run --target dev
-snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE214_DEMO run --select sv_customer_analytics --target dev
+snow dbt deploy DE214 --source . --database DE214 --schema DEV
+snow dbt execute --dbt-version "1.10.15" --database DE214 --schema DEV DE214 run --target dev
+snow dbt execute --dbt-version "1.10.15" --database DE214 --schema DEV DE214 run --select sv_customer_analytics --target dev
 ```
 
 ### One-time setup
@@ -208,7 +208,7 @@ cd dbt_project
 dbt deps --profiles-dir .
 
 # Deploy the dbt project object and build + test in DEV
-snow dbt deploy DE214_DEMO --source . --database DE214_DEMO --schema DEV
-snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE214_DEMO run --target dev
-snow dbt execute --dbt-version "1.10.15" --database DE214_DEMO --schema DEV DE214_DEMO test --target dev
+snow dbt deploy DE214 --source . --database DE214 --schema DEV
+snow dbt execute --dbt-version "1.10.15" --database DE214 --schema DEV DE214 run --target dev
+snow dbt execute --dbt-version "1.10.15" --database DE214 --schema DEV DE214 test --target dev
 ```

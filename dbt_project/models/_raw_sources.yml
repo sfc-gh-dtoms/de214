@@ -6,7 +6,7 @@ sources:
       Obfuscated source tables loaded from TPC-H by scripts/00_setup_sources.sql.
       Names and columns are intentionally cryptic and metadata-poor: this is what
       an AI agent sees BEFORE the modeled mart and semantic view exist.
-    database: DE214_DEMO
+    database: DE214
     schema: RAW
     tables:
       - name: C_MST
