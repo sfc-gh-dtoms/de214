@@ -59,10 +59,8 @@ jobs:
         env:
           CHANGED_FILES: ${{ steps.changed.outputs.files }}
         run: |
-          cortex exec \
-            --allowed "Read,Grep" \
-            -o review.md \
-            "Use the semantic-view-authoring skill to review the changed semantic view model(s): ${CHANGED_FILES}. Follow the skill's 'PR Review checklist' and output format. Do not modify any files."
+          cortex exec "Use the semantic-view-authoring skill to review the changed semantic view model(s): ${CHANGED_FILES}. Follow the skill's 'PR Review checklist' and output format. Do not modify any files." \
+            --allowed "Read,Grep" -o review.md
           echo "----- review.md -----"; cat review.md
 
       - name: Post review as PR comment
