@@ -58,7 +58,10 @@ METRICS (
     orders.avg_order_value AS SUM(orders.net_revenue) / NULLIF(COUNT(orders.order_id), 0)
         WITH SYNONYMS = ('AOV', 'average order value', 'average basket size'),
     orders.units_sold AS SUM(orders.total_quantity)
-        WITH SYNONYMS = ('units', 'quantity sold', 'total quantity')
+        WITH SYNONYMS = ('units', 'quantity sold', 'total quantity'),
+    orders.discount_rate AS 1 - (SUM(orders.net_revenue) / NULLIF(SUM(orders.gross_revenue), 0))
+        WITH SYNONYMS = ('discount ratio', 'average discount', 'discount percentage')
+        COMMENT = 'Effective discount rate: 1 - (net_revenue / gross_revenue). Returns NULL when gross_revenue is zero.'
 )
 
 COMMENT = 'Sales analytics semantic model: net revenue, order volume and AOV by segment, region and time.'
